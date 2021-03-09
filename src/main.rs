@@ -1,7 +1,27 @@
 #[macro_use]
 extern crate lopdf;
+
+use itertools::Itertools;
 use lopdf::content::{Content, Operation};
 use lopdf::{Document, Object, Stream};
+use rand::prelude::*;
+
+fn coordinates() -> Vec<(u32, u32)> {
+    let mut rng = rand::thread_rng();
+    let mut result: Vec<(u32, u32)> = (40..=550)
+        .step_by(60)
+        .cartesian_product((40..=800).step_by(60))
+        .map(|(x, y)| {
+            (
+                (x + rng.gen_range(-10i32..=10i32)) as u32,
+                (y + rng.gen_range(-15i32..=15i32)) as u32,
+            )
+        })
+        .collect();
+
+    result.shuffle(&mut rng);
+    result
+}
 
 fn main() {
     let mut doc = Document::with_version("1.5");
@@ -16,15 +36,22 @@ fn main() {
             "F1" => font_id,
         },
     });
-    let content = Content {
-        operations: vec![
-            Operation::new("BT", vec![]),
-            Operation::new("Tf", vec!["F1".into(), 48.into()]),
-            Operation::new("Td", vec![100.into(), 600.into()]),
-            Operation::new("Tj", vec![Object::string_literal("Hello World!")]),
-            Operation::new("ET", vec![]),
-        ],
+    let mut content = Content {
+        operations: vec![Operation::new("Tf", vec!["F1".into(), 18.into()])],
     };
+    let mut coordinates = coordinates();
+    for num in 1..=100 {
+        let (x, y) = coordinates.pop().unwrap();
+        content.operations.extend(
+            vec![
+                Operation::new("BT", vec![]),
+                Operation::new("Td", vec![x.into(), y.into()]),
+                Operation::new("Tj", vec![Object::string_literal(num.to_string())]),
+                Operation::new("ET", vec![]),
+            ]
+                .into_iter(),
+        );
+    }
     let content_id = doc.add_object(Stream::new(dictionary! {}, content.encode().unwrap()));
     let page_id = doc.add_object(dictionary! {
         "Type" => "Page",
@@ -45,5 +72,5 @@ fn main() {
     });
     doc.trailer.set("Root", catalog_id);
     doc.compress();
-    doc.save("example.pdf").unwrap();
+    doc.save("cirnum.pdf").unwrap();
 }

@@ -8,9 +8,9 @@ use rand::prelude::*;
 
 fn coordinates() -> Vec<(u32, u32)> {
     let mut rng = rand::thread_rng();
-    let mut result: Vec<(u32, u32)> = (40..=550)
+    let mut result: Vec<(u32, u32)> = (50..=530)
         .step_by(60)
-        .cartesian_product((40..=800).step_by(60))
+        .cartesian_product((40..=760).step_by(60))
         .map(|(x, y)| {
             (
                 (x + rng.gen_range(-10i32..=10i32)) as u32,
@@ -49,7 +49,7 @@ fn main() {
                 Operation::new("Tj", vec![Object::string_literal(num.to_string())]),
                 Operation::new("ET", vec![]),
             ]
-                .into_iter(),
+            .into_iter(),
         );
     }
     let content_id = doc.add_object(Stream::new(dictionary! {}, content.encode().unwrap()));

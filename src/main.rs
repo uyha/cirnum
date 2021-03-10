@@ -40,7 +40,7 @@ fn main() {
         operations: vec![Operation::new("Tf", vec!["F1".into(), 18.into()])],
     };
     let mut coordinates = coordinates();
-    for num in 1..=100 {
+    for num in 1..=99 {
         let (x, y) = coordinates.pop().unwrap();
         content.operations.extend(
             vec![

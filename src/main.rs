@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate lopdf;
 
+use chrono::prelude::*;
 use itertools::Itertools;
 use lopdf::content::{Content, Operation};
 use lopdf::{Document, Object, Stream};
@@ -72,5 +73,9 @@ fn main() {
     });
     doc.trailer.set("Root", catalog_id);
     doc.compress();
-    doc.save("cirnum.pdf").unwrap();
+    let filename = format!(
+        "cirnum-{}.pdf",
+        Local::now().format("%Y-%m-%d-%H-%M-%S").to_string()
+    );
+    doc.save(filename).unwrap();
 }
